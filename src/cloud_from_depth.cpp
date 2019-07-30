@@ -1,3 +1,6 @@
+// Todo: Write a funciton to save pointcloud that is generated in images2cloud
+
+
 #include <ros/ros.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <sensor_msgs/PointCloud2.h>
@@ -129,7 +132,7 @@ void callback(const sensor_msgs::ImageConstPtr& msg_rgb , const sensor_msgs::Ima
     generator.images2cloud();
     generator.publish();
 
-    // Uncomment below lines to save images
+    // Uncomment following line to save images pairs
     // generator.saveImages();
 }
 
