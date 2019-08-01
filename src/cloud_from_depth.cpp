@@ -1,4 +1,7 @@
-// Todo: Write a funciton to save pointcloud that is generated in images2cloud
+// 1. Synchronously saves rgb, depth and pointcloud in the current folder
+// 2. Cloud can either be save in ply(visualizable in meshlab) or pcd format(visualizable in pcl_viewer)
+// 3. For changing between ply and pcd : give true or false command to generator.saveCloud(true) function
+// 4. Currently rgb images is save as bgr format not in rgb, so remmeber to swap while layers while reading 
 
 
 #include <ros/ros.h>
@@ -6,6 +9,8 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/common/transforms.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/io/ply_io.h>
 #include <string>
 #include <message_filters/subscriber.h>
 #include <message_filters/sync_policies/approximate_time.h>
@@ -16,6 +21,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <vector>
 #include <set>
+#include <string>
 
 typedef pcl::PointCloud<pcl::PointXYZRGB> PointCloudT;
 
@@ -26,7 +32,7 @@ private:
 	PointCloudT::Ptr cloud;
 	cv::Mat& rgb;
 	cv::Mat& depth;
-	static int cnt;
+	static int cnt, cloudCnt;
 
 public:
 	genCloud(cv::Mat &argRgb, cv::Mat &argDepth) : cloud{new PointCloudT()}, rgb{argRgb}, depth{argDepth} {};
@@ -51,12 +57,12 @@ public:
 					point.x = (x - cx) * point.z / fx;
 					point.y = (y - cy) * point.z / fy;
 					
-					// float temp_z = point.z; 
-					// float temp_x = point.x;
-					// float temp_y = point.y;
-					// point.x = temp_z;
-					// point.z = -temp_y;
-					// point.y = -temp_x;
+					float temp_z = point.z; 
+					float temp_x = point.x;
+					float temp_y = point.y;
+					point.x = temp_z;
+					point.z = -temp_y;
+					point.y = -temp_x;
 					
 					point.r = rgb.at<cv::Vec3b>(y, x)[0];
 					point.g = rgb.at<cv::Vec3b>(y, x)[1];
@@ -83,7 +89,7 @@ public:
 	}
 
 	void saveImages(void){
-		static int cnt = 0;
+		// static int cnt = 0;
 	    char file_rgb[100];
 	    char file_depth[100];
 
@@ -99,9 +105,18 @@ public:
 	    cv::imwrite(file_depth, depth, png_parameters);
 	    ++cnt;
 	}
+
+	void saveCloud(bool ply=false){
+		if(ply == false)
+			pcl::io::savePCDFileASCII("cloud"+std::to_string(cloudCnt)+".pcd", *cloud);
+		else
+			pcl::io::savePLYFileBinary("cloud"+std::to_string(cloudCnt)+".ply", *cloud);			
+		++cloudCnt;
+	}
 };
 
 int genCloud::cnt = 0;
+int genCloud::cloudCnt = 0;
 
 void callback(const sensor_msgs::ImageConstPtr& msg_rgb , const sensor_msgs::ImageConstPtr& msg_depth){
 	// fprintf(stderr, "encoding: %s\n", msg_depth->encoding.c_str());
@@ -132,8 +147,11 @@ void callback(const sensor_msgs::ImageConstPtr& msg_rgb , const sensor_msgs::Ima
     generator.images2cloud();
     generator.publish();
 
-    // Uncomment following line to save images pairs
-    // generator.saveImages();
+    // Save rgb/depth image pairs
+    generator.saveImages();
+
+    // Save pointcloud
+    generator.saveCloud(true);
 }
 
 
