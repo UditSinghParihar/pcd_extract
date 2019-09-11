@@ -6,6 +6,9 @@
 #include <fstream>
 #include <string>
 #include "/home/cair/catkin_ws2/devel/include/semantic_mapper/SemLabel.h"
+#include <tf/transform_datatypes.h>
+
+#define pi 3.14
 
 void callback(const semantic_mapper::SemLabelConstPtr &msg,
 	const geometry_msgs::TransformStampedConstPtr &pose){
@@ -16,18 +19,19 @@ void callback(const semantic_mapper::SemLabelConstPtr &msg,
 	float q_y =	pose->transform.rotation.y;
 	float q_z = pose->transform.rotation.z;
 	float q_w = pose->transform.rotation.w;
-
-	Eigen::Quaternionf q(q_w, q_x, q_y, q_z);
-	Eigen::Vector3f euler = q.toRotationMatrix().eulerAngles(0, 1, 2);
-
 	float x = pose->transform.translation.x;
 	float y = pose->transform.translation.y;
-	float theta = euler[2];
 
-	static std::string fileName{"/home/cair/backup/rapyuta3/tf_label.txt"};
+	tf::Quaternion q(q_x, q_y, q_z, q_w);
+	tf::Matrix3x3 m(q);
+	double roll, pitch, yaw;
+	m.getRPY(roll, pitch, yaw);
+	yaw += (-pi/2);
+
+	static std::string fileName{"/home/cair/backup/rapyuta4/tf_label.txt"};
 	static std::ofstream fileWrite{fileName};
 
-	fileWrite << x << " " << y <<  " " << theta << " " << msg->lvl << 
+	fileWrite << x << " " << y <<  " " << yaw << " " << msg->lvl << 
 	std::endl;
 }
 

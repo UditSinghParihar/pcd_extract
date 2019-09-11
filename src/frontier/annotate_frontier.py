@@ -17,7 +17,7 @@ if __name__ == '__main__':
 	occ_size = 128
 	
 	occ_map = np.loadtxt(file_occ,delimiter=' ')
-
+	
 	occx = []
 	occy = []
 	unx = []

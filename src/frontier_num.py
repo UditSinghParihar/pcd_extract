@@ -10,7 +10,7 @@ def draw(arr):
 	plt.plot(arr.shape[0]/2, arr.shape[1]/2, 'ro', markersize=15)
 	plt.xlim(0, arr.shape[0])
 	plt.ylim(0, arr.shape[1])
-	plt.show(block=False)
+	plt.show(block=True)
 	plt.pause(0.3)
 	plt.close()
 
@@ -36,12 +36,13 @@ def thresh(file):
 	
 	# draw(arr)
 	crop = np.copy(arr)
-	arr[np.where(crop>58)] = 100 # 100/0
-	arr[np.where((crop<58) & (crop != -1))] = 50 # 50/1
+	arr[np.where(crop==100)] = 0 # 100/0
+	arr[np.where(crop ==0)] = 1 # 50/1
 	draw(arr)
-	# np.save("/home/cair/Desktop/frontier", arr)
+	np.save("/home/cair/Desktop/frontier", arr)
 
 	return arr
+
 
 if __name__ == '__main__':
 	if(len(sys.argv) != 2):
@@ -50,8 +51,8 @@ if __name__ == '__main__':
 
 	files = readFiles(sys.argv[1])
 
-	for file in files[50:-1]:
-		thresh(file)
+	# for file in files:
+	# 	thresh(file)
 
-	# grid = thresh(files[250])
+	grid = thresh(files[1260])
 

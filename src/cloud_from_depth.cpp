@@ -1,7 +1,6 @@
 // 1. Synchronously saves rgb, depth and pointcloud in the current folder
 // 2. Cloud can either be save in ply(visualizable in meshlab) or pcd format(visualizable in pcl_viewer)
 // 3. For changing between ply and pcd : give true or false command to generator.saveCloud(true) function
-// 4. Currently rgb images is save as bgr format not in rgb, so remmeber to swap while layers while reading 
 
 
 #include <ros/ros.h>
@@ -38,7 +37,7 @@ public:
 	genCloud(cv::Mat &argRgb, cv::Mat &argDepth) : cloud{new PointCloudT()}, rgb{argRgb}, depth{argDepth} {};
 
 	void images2cloud(void){
-		const float fx = 383.70, fy = 383.70, cx = 324.18, cy = 239.08, depth_threshold = 3;
+		const float fx = 383.70, fy = 383.70, cx = 324.18, cy = 239.08, depth_threshold = 5;
 		cloud->is_dense = true;
 		int image_index = 0, bad_image_index = 0;
 		std::set<float> list;
@@ -57,16 +56,16 @@ public:
 					point.x = (x - cx) * point.z / fx;
 					point.y = (y - cy) * point.z / fy;
 					
-					float temp_z = point.z; 
-					float temp_x = point.x;
-					float temp_y = point.y;
-					point.x = temp_z;
-					point.z = -temp_y;
-					point.y = -temp_x;
+					// float temp_z = point.z; 
+					// float temp_x = point.x;
+					// float temp_y = point.y;
+					// point.x = temp_z;
+					// point.z = -temp_y;
+					// point.y = -temp_x;
 					
-					point.r = rgb.at<cv::Vec3b>(y, x)[0];
+					point.r = rgb.at<cv::Vec3b>(y, x)[2];
 					point.g = rgb.at<cv::Vec3b>(y, x)[1];
-					point.b = rgb.at<cv::Vec3b>(y, x)[2];
+					point.b = rgb.at<cv::Vec3b>(y, x)[0];
 					++image_index;
 					cloud->points.push_back(point);
 				}
@@ -81,9 +80,10 @@ public:
 		// std::cout << "\n--\n";	
 	}
 
-	void publish(void){
+	void publish(const sensor_msgs::ImageConstPtr& msg_rgb){
 		sensor_msgs::PointCloud2 output;
 		pcl::toROSMsg(*cloud, output);
+		output.header.stamp = msg_rgb->header.stamp;
 		output.header.frame_id = "realsense_link";
 		pub.publish(output);
 	}
@@ -125,14 +125,14 @@ void callback(const sensor_msgs::ImageConstPtr& msg_rgb , const sensor_msgs::Ima
     cv_bridge::CvImagePtr img_ptr_depth;
     
     try{
-        img_ptr_depth = cv_bridge::toCvCopy(msg_depth, sensor_msgs::image_encodings::TYPE_16UC1);
+        img_ptr_depth = cv_bridge::toCvCopy(*msg_depth, sensor_msgs::image_encodings::TYPE_16UC1);
     }
     catch (cv_bridge::Exception& e){
         ROS_ERROR("cv_bridge exception:  %s", e.what());
         return;
     }
     try{
-        img_ptr_rgb = cv_bridge::toCvCopy(*msg_rgb, sensor_msgs::image_encodings::TYPE_8UC3);
+        img_ptr_rgb = cv_bridge::toCvCopy(*msg_rgb, sensor_msgs::image_encodings::BGR8);
     }
     catch (cv_bridge::Exception& e){
         ROS_ERROR("cv_bridge exception:  %s", e.what());
@@ -145,13 +145,13 @@ void callback(const sensor_msgs::ImageConstPtr& msg_rgb , const sensor_msgs::Ima
     mat_depth.convertTo(mat_depth, CV_32FC1);
     genCloud generator{mat_rgb, mat_depth};
     generator.images2cloud();
-    generator.publish();
+    generator.publish(msg_rgb);
 
-    // Save rgb/depth image pairs
-    generator.saveImages();
+    // Save rgb/depth image pairs, also comment mat_depth.covertTo() line.
+    // generator.saveImages();
 
     // Save pointcloud
-    generator.saveCloud(true);
+    // generator.saveCloud(true);
 }
 
 

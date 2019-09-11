@@ -13,7 +13,7 @@ import subprocess
 
 if __name__ == '__main__':
 	file_occ = sys.argv[1]
-	occ_size = 120
+	occ_size = 800
 	
 	occ_map = np.load(file_occ)
 
@@ -131,5 +131,6 @@ if __name__ == '__main__':
 	center_line = np.array([[occ_size/2 - 1,0],[occ_size/2 -1 ,occ_size-1]])
 	plt.plot(center_line[:,0],center_line[:,1])
 	frontiers, = ax.plot(centx,centy,'og',picker=5)
-
+	# print(len(frontiers))
+	
 	plt.show()

@@ -1,6 +1,7 @@
 from sys import argv
 import matplotlib.pyplot as plt
 
+
 def read(fileName):
 	f = open(fileName, 'r')
 	A = f.readlines()
@@ -55,8 +56,8 @@ if __name__ == '__main__':
 	ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 
 	# ax.axis('scaled')
-	plt.ylim(-40, 40)
-	plt.xlim(-50, 30)
+	# plt.ylim(-40, 40)
+	# plt.xlim(-50, 30)
 	plt.gca().set_aspect('equal', adjustable='box')
 	
 	plt.show()

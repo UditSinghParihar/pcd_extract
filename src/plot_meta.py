@@ -25,6 +25,9 @@ def read(fileName):
 if __name__ == '__main__':
 	fileName = str(argv[1])
 	(X, Y, THETA, LBL) = read(fileName)
+	sz = len(X)
+	print(sz)
+	X = X[0:sz/4]; Y = Y[0:sz/4]; THETA = THETA[0:sz/4]; LBL = LBL[0:sz/4]
 
 	X0 = []; Y0 = []; X1 = []; Y1 = []; X2 = []; Y2 =[]; X3 = []; Y3 = [];
 	for i in xrange(len(LBL)):

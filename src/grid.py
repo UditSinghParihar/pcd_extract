@@ -5,6 +5,7 @@ from nav_msgs.msg import OccupancyGrid
 import numpy as np
 import math
 
+
 class Map(object):
 	def __init__(self):
 		rospy.init_node('Grid')
@@ -16,14 +17,14 @@ class Map(object):
 
 		self.map = np.full((self.w, self.h), -1)
 
-		# self.grid = OccupancyGrid()
-		# self.grid.header.frame_id ='laser_link'
-		# self.grid.info.resolution = self.res
-		# self.grid.info.width = self.w
-		# self.grid.info.height = self.h
-		# self.grid.info.origin.position.x = -self.w/2
-		# self.grid.info.origin.position.y = 0
-		# self.grid.data = []
+		self.grid = OccupancyGrid()
+		self.grid.header.frame_id ='laser_link'
+		self.grid.info.resolution = self.res
+		self.grid.info.width = self.w
+		self.grid.info.height = self.h
+		self.grid.info.origin.position.x = -self.w/2
+		self.grid.info.origin.position.y = 0
+		self.grid.data = []
 
 		self.pub = rospy.Publisher('/localMap', LaserScan, queue_size=1)
 		rospy.Subscriber('/scan', LaserScan, self.laserCb)
@@ -45,11 +46,11 @@ class Map(object):
 
 				angle += msg.angle_increment
 
-	# def mapPub(self):
-	# 	rate = rospy.Rate(10)
-	# 	while not rospy.is_shutdown():
-	# 		self.pub.publish(self.grid) 
-	# 		rate.sleep()
+	def mapPub(self):
+		rate = rospy.Rate(10)
+		while not rospy.is_shutdown():
+			self.pub.publish(self.grid) 
+			rate.sleep()
 
 if __name__ == '__main__':
 	obj = Map()
