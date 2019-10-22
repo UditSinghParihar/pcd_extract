@@ -28,61 +28,61 @@ def numpyToOcc(grid, res):
 	return msg
 
 
-def write_pgm(image, filename):
-	""" Write grayscale image in PGM format to file.
-	"""
-	height, width = image.shape
-	maxval = image.max()
-	with open(filename, 'wb') as f:
-		f.write('P2 \n{} {} \n{}\n'.format(width, height, maxval))
-		# not sure if next line works universally, but seems to work on my mac
-		f.write(bytearray(image))
+# def write_pgm(image, filename):
+# 	""" Write grayscale image in PGM format to file.
+# 	"""
+# 	height, width = image.shape
+# 	maxval = image.max()
+# 	with open(filename, 'wb') as f:
+# 		f.write('P2 \n{} {} \n{}\n'.format(width, height, maxval))
+# 		# not sure if next line works universally, but seems to work on my mac
+# 		f.write(bytearray(image))
 
 
-cnt = 0
+# cnt = 0
 
-def scanToGrid(points, robot):
-	width = 400; res = 0.08; free = 0; occ = 100; unk = -1 # (1,0,-1) == (0, 100, -1); res = 0.05
-	grid = np.full((2*width, 2*width), unk, dtype=int)
+# def scanToGrid(points, robot):
+# 	width = 250; res = 0.08; free = 0; occ = 100; unk = -1 # (1,0,-1) == (0, 100, -1); res = 0.05
+# 	grid = np.full((2*width, 2*width), unk, dtype=int)
 
-	pointsRobot = points - robot
-	# print(max(pointsRobot[:,0]), min(pointsRobot[:,0]), max(pointsRobot[:,1]), min(pointsRobot[:,1]))
+# 	pointsRobot = points - robot
+# 	# print(max(pointsRobot[:,0]), min(pointsRobot[:,0]), max(pointsRobot[:,1]), min(pointsRobot[:,1]))
 
-	for p in pointsRobot:
-		xCell = int(math.floor(p[1]/res) + width)
-		yCell = int(math.floor(p[0]/res) + width)
+# 	for p in pointsRobot:
+# 		xCell = int(math.floor(p[1]/res) + width)
+# 		yCell = int(math.floor(p[0]/res) + width)
 
-		ray = bre(width, width, xCell, yCell)
-		for cell in ray:
-			grid[cell[0], cell[1]] = free
+# 		ray = bre(width, width, xCell, yCell)
+# 		for cell in ray:
+# 			grid[cell[0], cell[1]] = free
 
-		grid[xCell, yCell] = occ
+# 		grid[xCell, yCell] = occ
 
-	grid[width, width] = occ
+# 	grid[width, width] = occ
 	
-	gridMsg = numpyToOcc(grid, res)
-	mapPub1.publish(gridMsg)
+# 	gridMsg = numpyToOcc(grid, res)
+# 	mapPub1.publish(gridMsg)
 
-	global cnt
-	# write_pgm(grid, params["dir"]+"file"+str(cnt)+".pgm")
-	# np.save(params["dir"]+"file"+str(cnt), grid)
-	cnt = cnt+1
+# 	global cnt
+# 	# write_pgm(grid, params["dir"]+"file"+str(cnt)+".pgm")
+# 	# np.save(params["dir"]+"file"+str(cnt), grid)
+# 	cnt = cnt+1
 
 
-def callback(msg):
-	# print("Recieved callback.")
+# def callback(msg):
+# 	# print("Recieved callback.")
 
-	# for p in pc2.read_points(msg, skip_nans=True):
-	# 	print(" x : %f  y: %f  z: %f" %(p[0],p[1],p[2]))
-	# 	break
+# 	# for p in pc2.read_points(msg, skip_nans=True):
+# 	# 	print(" x : %f  y: %f  z: %f" %(p[0],p[1],p[2]))
+# 	# 	break
 
-	points = ros_numpy.point_cloud2.pointcloud2_to_xyz_array(msg)
-	# print(points.shape)
-	# print("x: %f  y : %f  z : %f" % (points[0][0],  points[0][1], points[0][2]))
+# 	points = ros_numpy.point_cloud2.pointcloud2_to_xyz_array(msg)
+# 	# print(points.shape)
+# 	# print("x: %f  y : %f  z : %f" % (points[0][0],  points[0][1], points[0][2]))
 
-	robot = np.array([trans.transform.translation.x, trans.transform.translation.y, trans.transform.translation.z]).reshape(1, 3)
-	scanToGrid(points, robot)
-	# print(robot[0, 0], robot[0, 1], robot[0, 2])
+# 	robot = np.array([trans.transform.translation.x, trans.transform.translation.y, trans.transform.translation.z]).reshape(1, 3)
+# 	scanToGrid(points, robot)
+# 	# print(robot[0, 0], robot[0, 1], robot[0, 2])
 
 
 cnt2 = 0

@@ -90,20 +90,20 @@ public:
 
 	void saveImages(void){
 		// static int cnt = 0;
-	    char file_rgb[100];
-	    char file_depth[100];
+		char file_rgb[100];
+		char file_depth[100];
 
-	    sprintf( file_rgb, "%04d_rgb.png", cnt );
-	    sprintf( file_depth, "%04d_depth.png", cnt );
+		sprintf( file_rgb, "%04d_rgb.png", cnt );
+		sprintf( file_depth, "%04d_depth.png", cnt );
 
-	    std::vector<int> png_parameters;
-	    png_parameters.push_back( CV_IMWRITE_PNG_COMPRESSION );
+		std::vector<int> png_parameters;
+		png_parameters.push_back( CV_IMWRITE_PNG_COMPRESSION );
 	  
-	    png_parameters.push_back( 9 ); 
+		png_parameters.push_back( 9 ); 
 
-	    cv::imwrite(file_rgb , rgb, png_parameters);
-	    cv::imwrite(file_depth, depth, png_parameters);
-	    ++cnt;
+		cv::imwrite(file_rgb , rgb, png_parameters);
+		cv::imwrite(file_depth, depth, png_parameters);
+		++cnt;
 	}
 
 	void saveCloud(bool ply=false){
@@ -121,37 +121,37 @@ int genCloud::cloudCnt = 0;
 void callback(const sensor_msgs::ImageConstPtr& msg_rgb , const sensor_msgs::ImageConstPtr& msg_depth){
 	// fprintf(stderr, "encoding: %s\n", msg_depth->encoding.c_str());
 
-    cv_bridge::CvImagePtr img_ptr_rgb;
-    cv_bridge::CvImagePtr img_ptr_depth;
-    
-    try{
-        img_ptr_depth = cv_bridge::toCvCopy(*msg_depth, sensor_msgs::image_encodings::TYPE_16UC1);
-    }
-    catch (cv_bridge::Exception& e){
-        ROS_ERROR("cv_bridge exception:  %s", e.what());
-        return;
-    }
-    try{
-        img_ptr_rgb = cv_bridge::toCvCopy(*msg_rgb, sensor_msgs::image_encodings::BGR8);
-    }
-    catch (cv_bridge::Exception& e){
-        ROS_ERROR("cv_bridge exception:  %s", e.what());
-        return;
-    }
+	cv_bridge::CvImagePtr img_ptr_rgb;
+	cv_bridge::CvImagePtr img_ptr_depth;
+	
+	try{
+		img_ptr_depth = cv_bridge::toCvCopy(*msg_depth, sensor_msgs::image_encodings::TYPE_16UC1);
+	}
+	catch (cv_bridge::Exception& e){
+		ROS_ERROR("cv_bridge exception:  %s", e.what());
+		return;
+	}
+	try{
+		img_ptr_rgb = cv_bridge::toCvCopy(*msg_rgb, sensor_msgs::image_encodings::BGR8);
+	}
+	catch (cv_bridge::Exception& e){
+		ROS_ERROR("cv_bridge exception:  %s", e.what());
+		return;
+	}
 
-    cv::Mat& mat_depth = img_ptr_depth->image;
-    cv::Mat& mat_rgb = img_ptr_rgb->image;
+	cv::Mat& mat_depth = img_ptr_depth->image;
+	cv::Mat& mat_rgb = img_ptr_rgb->image;
 
-    mat_depth.convertTo(mat_depth, CV_32FC1);
-    genCloud generator{mat_rgb, mat_depth};
-    generator.images2cloud();
-    generator.publish(msg_rgb);
+	mat_depth.convertTo(mat_depth, CV_32FC1);
+	genCloud generator{mat_rgb, mat_depth};
+	generator.images2cloud();
+	generator.publish(msg_rgb);
 
-    // Save rgb/depth image pairs, also comment mat_depth.covertTo() line.
-    // generator.saveImages();
+	// Save rgb/depth image pairs, also comment mat_depth.covertTo() line.
+	// generator.saveImages();
 
-    // Save pointcloud
-    // generator.saveCloud(true);
+	// Save pointcloud
+	// generator.saveCloud(true);
 }
 
 
