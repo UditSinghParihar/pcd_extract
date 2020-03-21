@@ -13,12 +13,11 @@ def pubTf(msg):
 	msg.pose.pose.orientation.z, msg.pose.pose.orientation.w
 	
 	time = msg.header.stamp
-	
 	br.sendTransform((px, py, pz), (qx, qy, qz, qw), time, "base_link", "odom")
 
 
 
 if __name__ == '__main__':
 	rospy.init_node('tfBroadcaster')
-	rospy.Subscriber('pose', Odometry, pubTf)
+	rospy.Subscriber('raw_odom', Odometry, pubTf)
 	rospy.spin()
